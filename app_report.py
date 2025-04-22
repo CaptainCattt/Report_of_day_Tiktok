@@ -304,7 +304,12 @@ import plotly.express as px
 # --- Giao diện Streamlit ---
 st.set_page_config(page_title="REPORT DAILY OF TIKTOK", layout="wide")
 st.markdown(
-    "<h1 style='text-align: center; color: #4CAF50;'>📦 REPORT DAILY OF TIKTOK</h1>",
+    """
+    <div style='text-align: center; display: flex; justify-content: center; align-items: center; gap: 10px;'>
+        <img src='https://icons8.com/icon/118638/tiktok' width='40'/>
+        <h1 style='color: black; margin: 0;'>REPORT DAILY OF TIKTOK</h1>
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
