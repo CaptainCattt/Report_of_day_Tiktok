@@ -202,21 +202,23 @@ def process_tiktok_daily_report(df_all, df_income):
 
     # Dieu chinh
     Don_dieu_chinh = df_merged[(df_merged["Type"] != "Order")]
-    So_don_dieu_chinh = Don_dieu_chinh["Order/adjustment ID"].count()
+    So_don_dieu_chinh = len(Don_dieu_chinh["Related order ID"].drop_duplicates())
 
     # Dieuchinh tru phi
     Don_dieu_chinh_tru_phi = df_merged[
         (df_merged["Type"] == "Deductions incurred by seller")
     ]
-    So_Don_dieu_chinh_tru_phi = Don_dieu_chinh_tru_phi["Order/adjustment ID"].count()
+    So_Don_dieu_chinh_tru_phi = len(
+        Don_dieu_chinh_tru_phi["Related order ID"].drop_duplicates()
+    )
 
     # Dieu chinh san den bu
     Don_dieu_chinh_san_den_bu = df_merged[
         (df_merged["Type"].isin(["Logistics reimbursement", "Platform reimbursement"]))
     ]
-    So_Don_dieu_chinh_san_den_bu = Don_dieu_chinh_san_den_bu[
-        "Order/adjustment ID"
-    ].count()
+    So_Don_dieu_chinh_san_den_bu = len(
+        Don_dieu_chinh_san_den_bu["Related order ID"].drop_duplicates()
+    )
 
     # Don thanh toan truoc
     Don_thanh_toan_truoc = df_merged[
