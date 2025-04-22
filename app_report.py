@@ -182,6 +182,12 @@ def process_tiktok_daily_report(df_all, df_income):
     for col in date_columns:
         df_all[col] = df_all[col].dt.normalize()
 
+    Tong_tien_quyet_toan = df_income["Total settlement amount"].sum()
+
+    Tong_tien_hoan_thanh = df_income[df_income["Total revenue"] > 0][
+        "Total settlement amount"
+    ].sum()
+
     df_merged = pd.merge(
         df_income,
         df_all,
@@ -233,7 +239,6 @@ def process_tiktok_daily_report(df_all, df_income):
     Don_hoan_tra = df_merged[
         (df_merged["Type"] == "Order")
         & (df_merged["Total revenue"] <= 0)
-        & (df_merged["Cancelation/Return Type"] == "Return/Refund")
         & (df_merged["Sku Quantity of return"] != 0)
         & (df_merged["Classify"] == "Not Duplicate")
     ]
@@ -246,10 +251,6 @@ def process_tiktok_daily_report(df_all, df_income):
         & (df_merged["Total revenue"] <= 0)
     ]
     So_Don_boom = Don_boom["Order/adjustment ID"].count()
-
-    Tong_tien_quyet_toan = Don_quyet_toan["Total revenue"].sum()
-
-    Tong_tien_hoan_thanh = Don_hoan_thanh["Total revenue"].sum()
 
     # Đếm số lượng sản phẩm theo SKU Category
     SCx1_tiktok_hoan_thanh = df_merged[
@@ -306,14 +307,37 @@ def process_tiktok_daily_report(df_all, df_income):
 
 
 import streamlit as st
-import pandas as pd
-import plotly.express as px
+from PIL import Image
+import base64
 
-# --- Giao diện Streamlit ---
+# 🔺 Đặt lệnh set_page_config ở dòng đầu tiên
 st.set_page_config(page_title="REPORT DAILY OF TIKTOK", layout="wide")
+
+
+# ======= CHÈN LOGO GÓC TRÁI =======
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, "rb") as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+
+logo_path = "../Tool_Report/logo-lamvlog.png"
+logo_base64 = get_base64_of_bin_file(logo_path)
+
+# Hiển thị logo ở góc trên bên trái
+st.markdown(
+    f"""
+    <div style='position: absolute; z-index: 1000;'>
+        <img src="data:image/png;base64,{logo_base64}" width="150"/>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# ======= TIÊU ĐỀ CĂN GIỮA =======
 st.markdown(
     """
-    <div style='text-align: center; display: flex; justify-content: center; align-items: center; gap: 10px;'>
+    <div style='text-align: center; display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;'>
         <img src='https://img.icons8.com/?size=100&id=118638&format=png&color=000000' width='40'/>
         <h1 style='color: black; margin: 0;'>REPORT DAILY OF TIKTOK</h1>
     </div>
@@ -321,7 +345,8 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown("<br><br>", unsafe_allow_html=True)  # Tạo khoảng cách sau tiêu đề
+st.markdown("<br><br><br>", unsafe_allow_html=True)
+
 
 # Tạo các cột cho upload file
 col1, col2 = st.columns(2)
