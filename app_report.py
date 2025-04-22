@@ -337,7 +337,7 @@ st.markdown(
 # ======= TIÊU ĐỀ CĂN GIỮA =======
 st.markdown(
     """
-    <div style='text-align: center; display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;'>
+    <div style='text-align: center; display: flex; justify-content: center; align-items: center; gap: 10px;'>
         <img src='https://img.icons8.com/?size=100&id=118638&format=png&color=000000' width='40'/>
         <h1 style='color: black; margin: 0;'>REPORT DAILY OF TIKTOK</h1>
     </div>
