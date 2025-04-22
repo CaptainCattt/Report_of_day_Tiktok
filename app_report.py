@@ -247,6 +247,8 @@ def process_tiktok_daily_report(df_all, df_income):
 
     Tong_tien_quyet_toan = Don_quyet_toan["Total revenue"].sum()
 
+    Tong_tien_hoan_thanh = Don_hoan_thanh["Total revenue"].sum()
+
     # Đếm số lượng sản phẩm theo SKU Category
     SCx1_tiktok_hoan_thanh = df_merged[
         (df_merged["SKU Category"] == "SC-450g") & (df_merged["Total revenue"] > 0)
@@ -297,6 +299,7 @@ def process_tiktok_daily_report(df_all, df_income):
         Don_dieu_chinh_san_den_bu,
         Don_thanh_toan_truoc,
         Tong_tien_quyet_toan,
+        Tong_tien_hoan_thanh,
     )
 
 
@@ -423,6 +426,7 @@ if process_btn:
                 Don_dieu_chinh_san_den_bu,
                 Don_thanh_toan_truoc,
                 Tong_tien_quyet_toan,
+                Tong_tien_hoan_thanh,
             ) = process_tiktok_daily_report(df_all, df_income)
 
             st.session_state["Don_quyet_toan"] = Don_quyet_toan
@@ -434,6 +438,7 @@ if process_btn:
             st.session_state["Don_dieu_chinh_san_den_bu"] = Don_dieu_chinh_san_den_bu
             st.session_state["Don_dieu_chinh"] = Don_dieu_chinh
             st.session_state["Tong_tien_quyet_toan"] = Tong_tien_quyet_toan
+            st.session_state["Tong_tien_hoan_thanh"] = Tong_tien_hoan_thanh
 
             # Tạo các bảng thống kê
             bang_thong_ke_don_hang_tiktok = pd.DataFrame(
@@ -447,6 +452,7 @@ if process_btn:
                     "ĐƠN ĐC TRỪ PHÍ": [So_Don_dieu_chinh_tru_phi],
                     "ĐƠN ĐC SÀN ĐỀN BÙ": [So_Don_dieu_chinh_san_den_bu],
                     "SỐ TIEN QUYẾT TOÁN": [Tong_tien_quyet_toan],
+                    "SỐ TIEN HOÀN THÀNH": [Tong_tien_hoan_thanh],
                 },
                 index=["Tiktok"],
             )
