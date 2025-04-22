@@ -161,7 +161,7 @@ def process_tiktok_daily_report(df_all, df_income):
     # Chuẩn hóa SKU Category
     df_all["SKU Category"] = df_all["Seller SKU"]
     df_all["SKU Category"] = df_all["SKU Category"].str.replace(
-        r"^(COMBO-SC-ANHDUC|COMBO-SC-NGOCTRINH)", "COMBO-SC", regex=True
+        r"^(COMBO-SC-ANHDUC|COMBO-SC-NGOCTRINH|COMBO-SC-MIX)", "COMBO-SC", regex=True
     )
 
     date_columns = [
