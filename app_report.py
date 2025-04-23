@@ -240,6 +240,7 @@ def process_tiktok_daily_report(df_all, df_income):
         (df_merged["Type"] == "Order")
         & (df_merged["Total revenue"] <= 0)
         & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
         & (df_merged["Classify"] == "Not Duplicate")
     ]
     So_Don_hoan_tra = Don_hoan_tra["Order/adjustment ID"].count()
