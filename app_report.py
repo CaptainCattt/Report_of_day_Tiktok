@@ -6,6 +6,11 @@ import io
 
 
 def process_tiktok_daily_report(df_all, df_income):
+
+    VonX1 = 43741.24
+    VonX2 = 46041.24
+    VonCombo = 89782.48
+
     df_income.columns = df_income.columns.str.strip()
     df_income["ABS_Total_Fees"] = df_income["Total fees"].abs()
 
@@ -188,6 +193,10 @@ def process_tiktok_daily_report(df_all, df_income):
         "Total settlement amount"
     ].sum()
 
+    Tong_phi = df_income[df_income["Total settlement amount"] < 0][
+        "Total settlement amount"
+    ].sum()
+
     df_merged = pd.merge(
         df_income,
         df_all,
@@ -253,6 +262,93 @@ def process_tiktok_daily_report(df_all, df_income):
     ]
     So_Don_boom = Don_boom["Order/adjustment ID"].count()
 
+    SC_X1_boom = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Cancelation/Return Type"] == "Cancel")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["SKU Category"] == "SC-450g")
+    ]
+
+    SC_X2_boom = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Cancelation/Return Type"] == "Cancel")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["SKU Category"] == "SC-x2-450g")
+    ]
+
+    SC_combo_boom = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Cancelation/Return Type"] == "Cancel")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["SKU Category"] == "COMBO-SC")
+    ]
+
+    So_luong_SC_X1_boom = SC_X1_boom["Quantity"].sum()
+    So_luong_SC_X2_boom = SC_X2_boom["Quantity"].sum()
+    So_luong_SC_combo_boom = SC_combo_boom["Quantity"].sum()
+
+    SC_X1_hoan_tra = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
+        & (df_merged["Classify"] == "Not Duplicate")
+        & (df_merged["SKU Category"] == "SC-450g")
+    ]
+
+    SC_X2_hoan_tra = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
+        & (df_merged["Classify"] == "Not Duplicate")
+        & (df_merged["SKU Category"] == "SC-x2-450g")
+    ]
+
+    SC_COMBO_hoan_tra = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
+        & (df_merged["Classify"] == "Not Duplicate")
+        & (df_merged["SKU Category"] == "COMBO-SC")
+    ]
+
+    SC_X1_den_bu = df_merged[
+        (
+            df_merged["Type"].isin(
+                ["Logistics reimbursement", "Platform reimbursement"]
+            )
+            & (df_merged["SKU Category"] == "SC-450g")
+        )
+    ]
+
+    SC_X2_den_bu = df_merged[
+        (
+            df_merged["Type"].isin(
+                ["Logistics reimbursement", "Platform reimbursement"]
+            )
+            & (df_merged["SKU Category"] == "SC-x2-450g")
+        )
+    ]
+
+    SC_Combo_den_bu = df_merged[
+        (
+            df_merged["Type"].isin(
+                ["Logistics reimbursement", "Platform reimbursement"]
+            )
+            & (df_merged["SKU Category"] == "COMBO-SC")
+        )
+    ]
+
+    So_luong_SC_X1_den_bu = SC_X1_den_bu["Sku Quantity of return"].sum()
+    So_luong_SC_X2_den_bu = SC_X2_den_bu["Sku Quantity of return"].sum()
+    So_luong_SC_Combo_den_bu = SC_Combo_den_bu["Sku Quantity of return"].sum()
+
+    So_luong_SC_X1_hoan_tra = SC_X1_hoan_tra["Quantity"].sum()
+    So_luong_SC_X2_hoan_tra = SC_X2_hoan_tra["Quantity"].sum()
+    So_luong_SC_combo_hoan_tra = SC_COMBO_hoan_tra["Quantity"].sum()
+
     # Đếm số lượng sản phẩm theo SKU Category
     SCx1_tiktok_hoan_thanh = df_merged[
         (df_merged["SKU Category"] == "SC-450g") & (df_merged["Total revenue"] > 0)
@@ -266,20 +362,36 @@ def process_tiktok_daily_report(df_all, df_income):
         (df_merged["SKU Category"] == "COMBO-SC") & (df_merged["Total revenue"] > 0)
     ]
 
-    SCx1_tiktok_quyet_toan = df_merged[(df_merged["SKU Category"] == "SC-450g")]
-
-    SCx2_tiktok_quyet_toan = df_merged[(df_merged["SKU Category"] == "SC-x2-450g")]
-
-    SCxCombo_tiktok_quyet_toan = df_merged[(df_merged["SKU Category"] == "COMBO-SC")]
-
     so_luong_SCx1_tiktok_hoan_thanh = SCx1_tiktok_hoan_thanh["Quantity"].sum()
     so_luong_SCx2_tiktok_hoan_thanh = SCx2_tiktok_hoan_thanh["Quantity"].sum()
     so_luong_SC_combo_tiktok_hoan_thanh = SC_combo_tiktok_hoan_thanh["Quantity"].sum()
-    so_luong_SCx1_tiktok_quyet_toan = SCx1_tiktok_quyet_toan["Quantity"].sum()
-    so_luong_SCx2_tiktok_quyet_toan = SCx2_tiktok_quyet_toan["Quantity"].sum()
-    so_luong_SCxCombo_tiktok_quyet_toan = SCxCombo_tiktok_quyet_toan["Quantity"].sum()
+
+    so_luong_SCx1_tiktok_quyet_toan = (
+        so_luong_SCx1_tiktok_hoan_thanh + So_luong_SC_X1_den_bu
+    )
+    so_luong_SCx2_tiktok_quyet_toan = (
+        so_luong_SCx2_tiktok_hoan_thanh + So_luong_SC_X2_den_bu
+    )
+    so_luong_SCxCombo_tiktok_quyet_toan = (
+        so_luong_SC_combo_tiktok_hoan_thanh + So_luong_SC_Combo_den_bu
+    )
+
+    Tong_von = (
+        so_luong_SCx1_tiktok_quyet_toan * VonX1
+        + so_luong_SCx2_tiktok_quyet_toan * VonX2
+        + so_luong_SCxCombo_tiktok_quyet_toan * VonCombo
+    )
 
     return (
+        So_luong_SC_X1_den_bu,
+        So_luong_SC_X2_den_bu,
+        So_luong_SC_Combo_den_bu,
+        So_luong_SC_X1_hoan_tra,
+        So_luong_SC_X2_hoan_tra,
+        So_luong_SC_combo_hoan_tra,
+        So_luong_SC_X1_boom,
+        So_luong_SC_X2_boom,
+        So_luong_SC_combo_boom,
         so_luong_SCx1_tiktok_hoan_thanh,
         so_luong_SCx2_tiktok_hoan_thanh,
         so_luong_SC_combo_tiktok_hoan_thanh,
@@ -304,6 +416,8 @@ def process_tiktok_daily_report(df_all, df_income):
         Don_thanh_toan_truoc,
         Tong_tien_quyet_toan,
         Tong_tien_hoan_thanh,
+        Tong_phi,
+        Tong_von,
     )
 
 
@@ -421,6 +535,15 @@ if process_btn:
 
             # Process dữ liệu
             (
+                So_luong_SC_X1_den_bu,
+                So_luong_SC_X2_den_bu,
+                So_luong_SC_Combo_den_bu,
+                So_luong_SC_X1_hoan_tra,
+                So_luong_SC_X2_hoan_tra,
+                So_luong_SC_combo_hoan_tra,
+                So_luong_SC_X1_boom,
+                So_luong_SC_X2_boom,
+                So_luong_SC_combo_boom,
                 so_luong_SCx1_tiktok_hoan_thanh,
                 so_luong_SCx2_tiktok_hoan_thanh,
                 so_luong_SC_combo_tiktok_hoan_thanh,
@@ -445,6 +568,8 @@ if process_btn:
                 Don_thanh_toan_truoc,
                 Tong_tien_quyet_toan,
                 Tong_tien_hoan_thanh,
+                Tong_phi,
+                Tong_von,
             ) = process_tiktok_daily_report(df_all, df_income)
 
             st.session_state["Don_quyet_toan"] = Don_quyet_toan
@@ -469,8 +594,17 @@ if process_btn:
                     "ĐƠN HOÀN TRẢ": [So_Don_hoan_tra],
                     "ĐƠN ĐC TRỪ PHÍ": [So_Don_dieu_chinh_tru_phi],
                     "ĐƠN ĐC SÀN ĐỀN BÙ": [So_Don_dieu_chinh_san_den_bu],
-                    "SỐ TIEN QUYẾT TOÁN": [Tong_tien_quyet_toan],
-                    "SỐ TIEN HOÀN THÀNH": [Tong_tien_hoan_thanh],
+                },
+                index=["Tiktok"],
+            )
+
+            bang_thong_ke_tien_tiktok = pd.DataFrame(
+                {
+                    "SỐ TIỀN QUYẾT TOÁN": [Tong_tien_quyet_toan],
+                    "SỐ TIỀN HOÀN THÀNH": [Tong_tien_hoan_thanh],
+                    "PHÍ": [Tong_phi],
+                    "TỔNG VỐN": [Tong_von],
+                    "LỢI NHUẬN": [Tong_tien_quyet_toan - Tong_von],
                 },
                 index=["Tiktok"],
             )
@@ -481,24 +615,36 @@ if process_btn:
                         so_luong_SCx1_tiktok_hoan_thanh
                         + so_luong_SCx2_tiktok_hoan_thanh
                         + so_luong_SC_combo_tiktok_hoan_thanh * 2,
-                        so_luong_SCx1_tiktok_quyet_toan
-                        + so_luong_SCx2_tiktok_quyet_toan
-                        + so_luong_SCxCombo_tiktok_quyet_toan * 2,
+                        so_luong_SCx1_tiktok_hoan_thanh
+                        + So_luong_SC_X1_den_bu
+                        + so_luong_SCx2_tiktok_hoan_thanh
+                        + So_luong_SC_X2_den_bu
+                        + so_luong_SC_combo_tiktok_hoan_thanh * 2
+                        + So_luong_SC_Combo_den_bu * 2,
+                        So_luong_SC_X1_boom
+                        + So_luong_SC_X1_hoan_tra
+                        + So_luong_SC_X2_boom
+                        + So_luong_SC_X2_hoan_tra
+                        + So_luong_SC_combo_boom * 2
+                        + So_luong_SC_combo_hoan_tra * 2,
                     ],
                     "SCx1": [
                         so_luong_SCx1_tiktok_hoan_thanh,
-                        so_luong_SCx1_tiktok_quyet_toan,
+                        so_luong_SCx1_tiktok_hoan_thanh + So_luong_SC_X1_den_bu,
+                        So_luong_SC_X1_boom + So_luong_SC_X1_hoan_tra,
                     ],
                     "SCx2": [
                         so_luong_SCx2_tiktok_hoan_thanh,
-                        so_luong_SCx2_tiktok_quyet_toan,
+                        so_luong_SCx2_tiktok_hoan_thanh + So_luong_SC_X2_den_bu,
+                        So_luong_SC_X2_boom + So_luong_SC_X2_hoan_tra,
                     ],
                     "SCxCOMBO": [
                         so_luong_SC_combo_tiktok_hoan_thanh,
-                        so_luong_SCxCombo_tiktok_quyet_toan,
+                        so_luong_SC_combo_tiktok_hoan_thanh + So_luong_SC_Combo_den_bu,
+                        So_luong_SC_combo_boom + So_luong_SC_combo_hoan_tra,
                     ],
                 },
-                index=["HOÀN THÀNH", "QUYẾT TOÁN"],
+                index=["HOÀN THÀNH", "QUYẾT TOÁN", "HOÀN VỀ"],
             )
 
             # Vẽ các biểu đồ
@@ -557,6 +703,7 @@ if process_btn:
             st.session_state["bang_thong_ke_so_luong_tiktok"] = (
                 bang_thong_ke_so_luong_tiktok
             )
+            st.session_state["bang_thong_ke_tien_tiktok"] = bang_thong_ke_tien_tiktok
             st.session_state["fig_bar_tiktok"] = fig_bar_tiktok
             st.session_state["fig_pie_hoan_thanh"] = fig_pie_hoan_thanh
             st.session_state["fig_pie_quyet_toan"] = fig_pie_quyet_toan
@@ -570,6 +717,10 @@ if st.session_state.processing:
         unsafe_allow_html=True,
     )
     st.markdown("<br><br>", unsafe_allow_html=True)
+
+    with st.container():
+        st.markdown("#### 📋 Bảng Thống Kê Tiền Hàng")
+        st.dataframe(st.session_state["bang_thong_ke_tien_tiktok"])
 
     col1, col2 = st.columns(2)
     with col1:
