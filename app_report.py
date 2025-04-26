@@ -11,6 +11,10 @@ def process_tiktok_daily_report(df_all, df_income):
     VonX2 = 46041.24
     VonCombo = 89782.48
 
+    VonBTHP_0CAY = 24024.00
+    VonBTHP_CAY = 24024.00
+    VonBTHP_COMBO = 24024.00
+
     df_income.columns = df_income.columns.str.strip()
     df_income["ABS_Total_Fees"] = df_income["Total fees"].abs()
 
@@ -164,10 +168,26 @@ def process_tiktok_daily_report(df_all, df_income):
     )
 
     # Chuẩn hóa SKU Category
-    df_all["SKU Category"] = df_all["Seller SKU"]
-    df_all["SKU Category"] = df_all["SKU Category"].str.replace(
-        r"^(COMBO-SC-ANHDUC|COMBO-SC-NGOCTRINH|COMBO-SC-MIX)", "COMBO-SC", regex=True
-    )
+    df_all["SKU Category"] = df_all["Seller SKU"].copy()
+
+    # Danh sách các mẫu thay thế
+    replacements = {
+        r"^(COMBO-SC-ANHDUC|COMBO-SC-NGOCTRINH|COMBO-SC-MIX|SC_COMBO_MIX)": "COMBO-SC",
+        r"^(SC_X1)": "SC-450g",
+        r"^(SC_X2)": "SC-x2-450g",
+        r"^(SC_COMBO_X1|COMBO-CAYVUA-X1)": "COMBO-SCX1",
+        r"^(SC_COMBO_X2|COMBO-SIEUCAY-X2)": "COMBO-SCX2",
+        r"^(BTHP-Cay-200gr|BTHP_Cay)": "BTHP-CAY",
+        r"^(BTHP-200gr|BTHP_KhongCay)": "BTHP-0CAY",
+        r"^(BTHP_COMBO_MIX|BTHP003_combo_mix)": "BTHP-COMBO",
+        r"^(BTHP_COMBO_KhongCay|BTHP003_combo_kocay)": "BTHP-COMBO-0CAY",
+        r"^(BTHP_COMBO_Cay|BTHP003_combo_cay)": "BTHP-COMBO-CAY",
+    }
+
+    for pattern, replacement in replacements.items():
+        df_all["SKU Category"] = df_all["SKU Category"].str.replace(
+            pattern, replacement, regex=True
+        )
 
     date_columns = [
         "Created Time",
@@ -262,6 +282,7 @@ def process_tiktok_daily_report(df_all, df_income):
     ]
     So_Don_boom = Don_boom["Order/adjustment ID"].count()
 
+    # Số lượng
     SC_X1_boom = df_merged[
         (df_merged["Type"] == "Order")
         & (df_merged["Cancelation/Return Type"] == "Cancel")
@@ -345,9 +366,9 @@ def process_tiktok_daily_report(df_all, df_income):
     So_luong_SC_X2_den_bu = SC_X2_den_bu["Sku Quantity of return"].sum()
     So_luong_SC_Combo_den_bu = SC_Combo_den_bu["Sku Quantity of return"].sum()
 
-    So_luong_SC_X1_hoan_tra = SC_X1_hoan_tra["Quantity"].sum()
-    So_luong_SC_X2_hoan_tra = SC_X2_hoan_tra["Quantity"].sum()
-    So_luong_SC_combo_hoan_tra = SC_COMBO_hoan_tra["Quantity"].sum()
+    So_luong_SC_X1_hoan_tra = SC_X1_hoan_tra["Sku Quantity of return"].sum()
+    So_luong_SC_X2_hoan_tra = SC_X2_hoan_tra["Sku Quantity of return"].sum()
+    So_luong_SC_combo_hoan_tra = SC_COMBO_hoan_tra["Sku Quantity of return"].sum()
 
     # Đếm số lượng sản phẩm theo SKU Category
     SCx1_tiktok_hoan_thanh = df_merged[
@@ -366,23 +387,331 @@ def process_tiktok_daily_report(df_all, df_income):
     so_luong_SCx2_tiktok_hoan_thanh = SCx2_tiktok_hoan_thanh["Quantity"].sum()
     so_luong_SC_combo_tiktok_hoan_thanh = SC_combo_tiktok_hoan_thanh["Quantity"].sum()
 
+    # BÁNH TRÁNG và COMBO mới
+    COMBO_SCx1_hoan_thanh = df_merged[
+        (df_merged["SKU Category"] == "COMBO-SCX1") & (df_merged["Total revenue"] > 0)
+    ]
+
+    COMBO_SCx2_hoan_thanh = df_merged[
+        (df_merged["SKU Category"] == "COMBO-SCX2") & (df_merged["Total revenue"] > 0)
+    ]
+
+    so_luong_COMBO_SCx1_hoan_thanh = COMBO_SCx1_hoan_thanh["Quantity"].sum()
+    so_luong_COMBO_SCx2_hoan_thanh = COMBO_SCx2_hoan_thanh["Quantity"].sum()
+
+    COMBO_SCx1_den_bu = df_merged[
+        (
+            df_merged["Type"].isin(
+                ["Logistics reimbursement", "Platform reimbursement"]
+            )
+            & (df_merged["SKU Category"] == "COMBO-SCX1")
+        )
+    ]
+
+    COMBO_SCx2_den_bu = df_merged[
+        (
+            df_merged["Type"].isin(
+                ["Logistics reimbursement", "Platform reimbursement"]
+            )
+            & (df_merged["SKU Category"] == "COMBO-SCX2")
+        )
+    ]
+
+    so_luong_COMBO_SCx1_den_bu = COMBO_SCx1_den_bu["Sku Quantity of return"].sum()
+    so_luong_COMBO_SCx2_den_bu = COMBO_SCx2_den_bu["Sku Quantity of return"].sum()
+
+    COMBO_SCx1_hoan_tra = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
+        & (df_merged["Classify"] == "Not Duplicate")
+        & (df_merged["SKU Category"] == "COMBO-SCX1")
+    ]
+
+    COMBO_SCx2_hoan_tra = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
+        & (df_merged["Classify"] == "Not Duplicate")
+        & (df_merged["SKU Category"] == "COMBO-SCX2")
+    ]
+
+    so_luong_COMBO_SCx1_hoan_tra = COMBO_SCx1_hoan_tra["Sku Quantity of return"].sum()
+    so_luong_COMBO_SCx2_hoan_tra = COMBO_SCx2_hoan_tra["Sku Quantity of return"].sum()
+
+    SC_X1_boom = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Cancelation/Return Type"] == "Cancel")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["SKU Category"] == "COMBO-SCX1")
+    ]
+
+    SC_X2_boom = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Cancelation/Return Type"] == "Cancel")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["SKU Category"] == "COMBO-SCX2")
+    ]
+
+    so_luong_COMBO_SCx1_boom = SC_X1_boom["Quantity"].sum()
+    so_luong_COMBO_SCx2_boom = SC_X2_boom["Quantity"].sum()
+
+    # BÁNH TRÁNG
+    # BTHP-0CAY, BTHP-CAY, BTHP-COMBO, BTHP-COMBO-0CAY, BTHP-COMBO-CAY
+    BTHP_0CAY_hoan_thanh = df_merged[
+        (df_merged["SKU Category"] == "BTHP-0CAY") & (df_merged["Total revenue"] > 0)
+    ]
+
+    BTHP_CAY_hoan_thanh = df_merged[
+        (df_merged["SKU Category"] == "BTHP-CAY") & (df_merged["Total revenue"] > 0)
+    ]
+
+    BTHP_COMBO_hoan_thanh = df_merged[
+        (df_merged["SKU Category"] == "BTHP-COMBO") & (df_merged["Total revenue"] > 0)
+    ]
+
+    BTHP_COMBO_0CAY_hoan_thanh = df_merged[
+        (df_merged["SKU Category"] == "BTHP-COMBO-0CAY")
+        & (df_merged["Total revenue"] > 0)
+    ]
+
+    BTHP_COMBO_CAY_hoan_thanh = df_merged[
+        (df_merged["SKU Category"] == "BTHP-COMBO-CAY")
+        & (df_merged["Total revenue"] > 0)
+    ]
+
+    so_luong_BTHP_0CAY_hoan_thanh = BTHP_0CAY_hoan_thanh["Quantity"].sum()
+    so_luong_BTHP_CAY_hoan_thanh = BTHP_CAY_hoan_thanh["Quantity"].sum()
+    so_luong_BTHP_COMBO_hoan_thanh = BTHP_COMBO_hoan_thanh["Quantity"].sum()
+    so_luong_BTHP_COMBO_0CAY_hoan_thanh = BTHP_COMBO_0CAY_hoan_thanh["Quantity"].sum()
+    so_luong_BTHP_COMBO_CAY_hoan_thanh = BTHP_COMBO_CAY_hoan_thanh["Quantity"].sum()
+
+    BTHP_0CAY_den_bu = df_merged[
+        (
+            df_merged["Type"].isin(
+                ["Logistics reimbursement", "Platform reimbursement"]
+            )
+            & (df_merged["SKU Category"] == "BTHP-0CAY")
+        )
+    ]
+
+    BTHP_CAY_den_bu = df_merged[
+        (
+            df_merged["Type"].isin(
+                ["Logistics reimbursement", "Platform reimbursement"]
+            )
+            & (df_merged["SKU Category"] == "BTHP-CAY")
+        )
+    ]
+
+    BTHP_COMBO_den_bu = df_merged[
+        (
+            df_merged["Type"].isin(
+                ["Logistics reimbursement", "Platform reimbursement"]
+            )
+            & (df_merged["SKU Category"] == "BTHP-COMBO")
+        )
+    ]
+
+    BTHP_COMBO_0CAY_den_bu = df_merged[
+        (
+            df_merged["Type"].isin(
+                ["Logistics reimbursement", "Platform reimbursement"]
+            )
+            & (df_merged["SKU Category"] == "BTHP-COMBO-0CAY")
+        )
+    ]
+
+    BTHP_COMBO_CAY_den_bu = df_merged[
+        (
+            df_merged["Type"].isin(
+                ["Logistics reimbursement", "Platform reimbursement"]
+            )
+            & (df_merged["SKU Category"] == "BTHP-COMBO-CAY")
+        )
+    ]
+
+    so_luong_BTHP_0CAY_den_bu = BTHP_0CAY_den_bu["Sku Quantity of return"].sum()
+    so_luong_BTHP_CAY_den_bu = BTHP_CAY_den_bu["Sku Quantity of return"].sum()
+    so_luong_BTHP_COMBO_den_bu = BTHP_COMBO_den_bu["Sku Quantity of return"].sum()
+    so_luong_BTHP_COMBO_0CAY_den_bu = BTHP_COMBO_0CAY_den_bu[
+        "Sku Quantity of return"
+    ].sum()
+    so_luong_BTHP_COMBO_CAY_den_bu = BTHP_COMBO_CAY_den_bu[
+        "Sku Quantity of return"
+    ].sum()
+
+    BTHP_0CAY_hoan_tra = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
+        & (df_merged["Classify"] == "Not Duplicate")
+        & (df_merged["SKU Category"] == "BTHP-0CAY")
+    ]
+
+    BTHP_CAY_hoan_tra = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
+        & (df_merged["Classify"] == "Not Duplicate")
+        & (df_merged["SKU Category"] == "BTHP-CAY")
+    ]
+
+    BTHP_COMBO_hoan_tra = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
+        & (df_merged["Classify"] == "Not Duplicate")
+        & (df_merged["SKU Category"] == "BTHP-COMBO")
+    ]
+
+    BTHP_COMBO_0CAY_hoan_tra = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
+        & (df_merged["Classify"] == "Not Duplicate")
+        & (df_merged["SKU Category"] == "BTHP-COMBO-0CAY")
+    ]
+
+    BTHP_COMBO_CAY_hoan_tra = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
+        & (df_merged["Classify"] == "Not Duplicate")
+        & (df_merged["SKU Category"] == "BTHP-COMBO-CAY")
+    ]
+
+    so_luong_BTHP_0CAY_hoan_tra = BTHP_0CAY_hoan_tra["Sku Quantity of return"].sum()
+    so_luong_BTHP_CAY_hoan_tra = BTHP_CAY_hoan_tra["Sku Quantity of return"].sum()
+    so_luong_BTHP_COMBO_hoan_tra = BTHP_COMBO_hoan_tra["Sku Quantity of return"].sum()
+    so_luong_BTHP_COMBO_0CAY_hoan_tra = BTHP_COMBO_0CAY_hoan_tra[
+        "Sku Quantity of return"
+    ].sum()
+    so_luong_BTHP_COMBO_CAY_hoan_tra = BTHP_COMBO_CAY_hoan_tra[
+        "Sku Quantity of return"
+    ].sum()
+
+    BTHP_0CAY_boom = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Cancelation/Return Type"] == "Cancel")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["SKU Category"] == "BTHP-0CAY")
+    ]
+
+    BTHP_CAY_boom = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Cancelation/Return Type"] == "Cancel")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["SKU Category"] == "BTHP-CAY")
+    ]
+
+    BTHP_COMBO_boom = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Cancelation/Return Type"] == "Cancel")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["SKU Category"] == "BTHP-COMBO")
+    ]
+
+    BTHP_COMBO_0CAY_boom = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Cancelation/Return Type"] == "Cancel")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["SKU Category"] == "BTHP-COMBO-0CAY")
+    ]
+
+    BTHP_COMBO_CAY_boom = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Cancelation/Return Type"] == "Cancel")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["SKU Category"] == "BTHP-COMBO-CAY")
+    ]
+
+    so_luong_BTHP_0CAY_boom = BTHP_0CAY_boom["Quantity"].sum()
+    so_luong_BTHP_CAY_boom = BTHP_CAY_boom["Quantity"].sum()
+    so_luong_BTHP_COMBO_boom = BTHP_COMBO_boom["Quantity"].sum()
+    so_luong_BTHP_COMBO_0CAY_boom = BTHP_COMBO_0CAY_boom["Quantity"].sum()
+    so_luong_BTHP_COMBO_CAY_boom = BTHP_COMBO_CAY_boom["Quantity"].sum()
+
+    # Tính toán tổng số lượng sản phẩm hoàn thành và quyết toán
     so_luong_SCx1_tiktok_quyet_toan = (
-        so_luong_SCx1_tiktok_hoan_thanh + So_luong_SC_X1_den_bu
+        so_luong_SCx1_tiktok_hoan_thanh
+        + So_luong_SC_X1_den_bu
+        + so_luong_COMBO_SCx1_hoan_thanh * 2
+        + so_luong_COMBO_SCx1_den_bu * 2
     )
     so_luong_SCx2_tiktok_quyet_toan = (
-        so_luong_SCx2_tiktok_hoan_thanh + So_luong_SC_X2_den_bu
+        so_luong_SCx2_tiktok_hoan_thanh
+        + So_luong_SC_X2_den_bu
+        + so_luong_COMBO_SCx2_hoan_thanh * 2
+        + so_luong_COMBO_SCx2_den_bu * 2
     )
     so_luong_SCxCombo_tiktok_quyet_toan = (
-        so_luong_SC_combo_tiktok_hoan_thanh + So_luong_SC_Combo_den_bu
+        so_luong_SC_combo_tiktok_hoan_thanh * 2 + So_luong_SC_Combo_den_bu * 2
     )
 
-    Tong_von = (
+    Tong_BTHP_hoan_ve = (
+        so_luong_BTHP_0CAY_boom
+        + so_luong_BTHP_CAY_boom
+        + so_luong_BTHP_COMBO_boom * 2
+        + so_luong_BTHP_COMBO_0CAY_boom * 2
+        + so_luong_BTHP_COMBO_CAY_boom * 2
+        + so_luong_BTHP_0CAY_hoan_tra
+        + so_luong_BTHP_CAY_hoan_tra
+        + so_luong_BTHP_COMBO_hoan_tra * 2
+        + so_luong_BTHP_COMBO_0CAY_hoan_tra * 2
+        + so_luong_BTHP_COMBO_CAY_hoan_tra * 2
+    )
+
+    Tong_von_SC = (
         so_luong_SCx1_tiktok_quyet_toan * VonX1
         + so_luong_SCx2_tiktok_quyet_toan * VonX2
         + so_luong_SCxCombo_tiktok_quyet_toan * VonCombo
     )
 
+    Tong_von_BTHP = (
+        (so_luong_BTHP_0CAY_hoan_thanh + so_luong_BTHP_0CAY_den_bu) * VonBTHP_0CAY
+        + (so_luong_BTHP_CAY_hoan_thanh + so_luong_BTHP_CAY_den_bu) * VonBTHP_CAY
+        + (so_luong_BTHP_COMBO_hoan_thanh + so_luong_BTHP_COMBO_den_bu) * VonBTHP_COMBO
+    )
+
     return (
+        # BÁNH TRÁNG
+        so_luong_BTHP_COMBO_0CAY_hoan_thanh,
+        so_luong_BTHP_COMBO_CAY_hoan_thanh,
+        so_luong_BTHP_COMBO_0CAY_den_bu,
+        so_luong_BTHP_COMBO_CAY_den_bu,
+        so_luong_BTHP_COMBO_0CAY_hoan_tra,
+        so_luong_BTHP_COMBO_CAY_hoan_tra,
+        so_luong_BTHP_COMBO_0CAY_boom,
+        so_luong_BTHP_COMBO_CAY_boom,
+        so_luong_BTHP_0CAY_hoan_thanh,
+        so_luong_BTHP_CAY_hoan_thanh,
+        so_luong_BTHP_COMBO_hoan_thanh,
+        so_luong_BTHP_0CAY_den_bu,
+        so_luong_BTHP_CAY_den_bu,
+        so_luong_BTHP_COMBO_den_bu,
+        so_luong_BTHP_0CAY_hoan_tra,
+        so_luong_BTHP_CAY_hoan_tra,
+        so_luong_BTHP_COMBO_hoan_tra,
+        so_luong_BTHP_0CAY_boom,
+        so_luong_BTHP_CAY_boom,
+        so_luong_BTHP_COMBO_boom,
+        # SC và COMBO mới
+        so_luong_COMBO_SCx1_hoan_thanh,
+        so_luong_COMBO_SCx2_hoan_thanh,
+        so_luong_COMBO_SCx1_den_bu,
+        so_luong_COMBO_SCx2_den_bu,
+        so_luong_COMBO_SCx1_hoan_tra,
+        so_luong_COMBO_SCx2_hoan_tra,
+        so_luong_COMBO_SCx1_boom,
+        so_luong_COMBO_SCx2_boom,
         So_luong_SC_X1_den_bu,
         So_luong_SC_X2_den_bu,
         So_luong_SC_Combo_den_bu,
@@ -417,7 +746,9 @@ def process_tiktok_daily_report(df_all, df_income):
         Tong_tien_quyet_toan,
         Tong_tien_hoan_thanh,
         Tong_phi,
-        Tong_von,
+        Tong_von_SC,
+        Tong_von_BTHP,
+        Tong_BTHP_hoan_ve,
     )
 
 
@@ -535,6 +866,36 @@ if process_btn:
 
             # Process dữ liệu
             (
+                # BÁNH TRÁNG
+                so_luong_BTHP_COMBO_0CAY_hoan_thanh,
+                so_luong_BTHP_COMBO_CAY_hoan_thanh,
+                so_luong_BTHP_COMBO_0CAY_den_bu,
+                so_luong_BTHP_COMBO_CAY_den_bu,
+                so_luong_BTHP_COMBO_0CAY_hoan_tra,
+                so_luong_BTHP_COMBO_CAY_hoan_tra,
+                so_luong_BTHP_COMBO_0CAY_boom,
+                so_luong_BTHP_COMBO_CAY_boom,
+                so_luong_BTHP_0CAY_hoan_thanh,
+                so_luong_BTHP_CAY_hoan_thanh,
+                so_luong_BTHP_COMBO_hoan_thanh,
+                so_luong_BTHP_0CAY_den_bu,
+                so_luong_BTHP_CAY_den_bu,
+                so_luong_BTHP_COMBO_den_bu,
+                so_luong_BTHP_0CAY_hoan_tra,
+                so_luong_BTHP_CAY_hoan_tra,
+                so_luong_BTHP_COMBO_hoan_tra,
+                so_luong_BTHP_0CAY_boom,
+                so_luong_BTHP_CAY_boom,
+                so_luong_BTHP_COMBO_boom,
+                # SC và COMBO mới
+                so_luong_COMBO_SCx1_hoan_thanh,
+                so_luong_COMBO_SCx2_hoan_thanh,
+                so_luong_COMBO_SCx1_den_bu,
+                so_luong_COMBO_SCx2_den_bu,
+                so_luong_COMBO_SCx1_hoan_tra,
+                so_luong_COMBO_SCx2_hoan_tra,
+                so_luong_COMBO_SCx1_boom,
+                so_luong_COMBO_SCx2_boom,
                 So_luong_SC_X1_den_bu,
                 So_luong_SC_X2_den_bu,
                 So_luong_SC_Combo_den_bu,
@@ -569,7 +930,9 @@ if process_btn:
                 Tong_tien_quyet_toan,
                 Tong_tien_hoan_thanh,
                 Tong_phi,
-                Tong_von,
+                Tong_von_SC,
+                Tong_von_BTHP,
+                Tong_BTHP_hoan_ve,
             ) = process_tiktok_daily_report(df_all, df_income)
 
             st.session_state["Don_quyet_toan"] = Don_quyet_toan
@@ -603,30 +966,48 @@ if process_btn:
                     "SỐ TIỀN QUYẾT TOÁN": [Tong_tien_quyet_toan],
                     "SỐ TIỀN HOÀN THÀNH": [Tong_tien_hoan_thanh],
                     "PHÍ": [Tong_phi],
-                    "TỔNG VỐN": [Tong_von],
-                    "LỢI NHUẬN": [Tong_tien_quyet_toan - Tong_von],
+                    "TỔNG VỐN SỐT CHẤM": [Tong_von_SC],
+                    "TỔNG VỐN BÁNH TRÁNG": [Tong_von_BTHP],
+                    "TỔNG VỐN": [Tong_von_SC + Tong_von_BTHP],
+                    "LỢI NHUẬN": [Tong_tien_quyet_toan - Tong_von_SC],
                 },
                 index=["Tiktok"],
             )
 
             bang_thong_ke_so_luong_tiktok = pd.DataFrame(
                 {
-                    "SL SP": [
-                        so_luong_SCx1_tiktok_hoan_thanh
-                        + so_luong_SCx2_tiktok_hoan_thanh
-                        + so_luong_SC_combo_tiktok_hoan_thanh * 2,
-                        so_luong_SCx1_tiktok_hoan_thanh
-                        + So_luong_SC_X1_den_bu
-                        + so_luong_SCx2_tiktok_hoan_thanh
-                        + So_luong_SC_X2_den_bu
-                        + so_luong_SC_combo_tiktok_hoan_thanh * 2
-                        + So_luong_SC_Combo_den_bu * 2,
-                        So_luong_SC_X1_boom
-                        + So_luong_SC_X1_hoan_tra
-                        + So_luong_SC_X2_boom
-                        + So_luong_SC_X2_hoan_tra
-                        + So_luong_SC_combo_boom * 2
-                        + So_luong_SC_combo_hoan_tra * 2,
+                    "TỔNG SỐ LƯỢNG SC": [
+                        (
+                            so_luong_SCx1_tiktok_hoan_thanh
+                            + so_luong_SCx2_tiktok_hoan_thanh
+                            + so_luong_SC_combo_tiktok_hoan_thanh * 2
+                            + so_luong_COMBO_SCx1_hoan_thanh * 2
+                            + so_luong_COMBO_SCx2_hoan_thanh * 2
+                        ),
+                        (
+                            so_luong_SCx1_tiktok_hoan_thanh
+                            + So_luong_SC_X1_den_bu
+                            + so_luong_COMBO_SCx1_hoan_thanh * 2
+                            + so_luong_COMBO_SCx1_den_bu * 2
+                            + so_luong_SCx2_tiktok_hoan_thanh
+                            + So_luong_SC_X2_den_bu
+                            + so_luong_COMBO_SCx2_hoan_thanh * 2
+                            + so_luong_COMBO_SCx2_den_bu * 2
+                            + so_luong_SC_combo_tiktok_hoan_thanh * 2
+                            + So_luong_SC_Combo_den_bu * 2
+                        ),
+                        (
+                            So_luong_SC_X1_boom
+                            + So_luong_SC_X1_hoan_tra
+                            + so_luong_COMBO_SCx1_boom * 2
+                            + so_luong_COMBO_SCx1_hoan_tra * 2
+                            + So_luong_SC_X2_boom
+                            + So_luong_SC_X2_hoan_tra
+                            + so_luong_COMBO_SCx2_boom * 2
+                            + so_luong_COMBO_SCx2_hoan_tra * 2
+                            + So_luong_SC_combo_boom * 2
+                            + So_luong_SC_combo_hoan_tra * 2
+                        ),
                     ],
                     "SCx1": [
                         so_luong_SCx1_tiktok_hoan_thanh,
@@ -642,6 +1023,86 @@ if process_btn:
                         so_luong_SC_combo_tiktok_hoan_thanh,
                         so_luong_SC_combo_tiktok_hoan_thanh + So_luong_SC_Combo_den_bu,
                         So_luong_SC_combo_boom + So_luong_SC_combo_hoan_tra,
+                    ],
+                    "COMBO_SCx1": [
+                        so_luong_COMBO_SCx1_hoan_thanh,
+                        so_luong_COMBO_SCx1_hoan_thanh + so_luong_COMBO_SCx1_den_bu,
+                        so_luong_COMBO_SCx1_boom + so_luong_COMBO_SCx1_hoan_tra,
+                    ],
+                    "COMBO_SCx2": [
+                        so_luong_COMBO_SCx2_hoan_thanh,
+                        so_luong_COMBO_SCx2_hoan_thanh + so_luong_COMBO_SCx2_den_bu,
+                        so_luong_COMBO_SCx2_boom + so_luong_COMBO_SCx2_hoan_tra,
+                    ],
+                },
+                index=["HOÀN THÀNH", "QUYẾT TOÁN", "HOÀN VỀ"],
+            )
+
+            bang_thong_ke_so_luong_BTHP_tiktok = pd.DataFrame(
+                {
+                    "TỔNG SỐ LƯỢNG BTHP": [
+                        # HOÀN THÀNH
+                        (
+                            so_luong_BTHP_0CAY_hoan_thanh
+                            + so_luong_BTHP_CAY_hoan_thanh
+                            + so_luong_BTHP_COMBO_hoan_thanh * 2
+                            + so_luong_BTHP_COMBO_0CAY_hoan_thanh * 2
+                            + so_luong_BTHP_COMBO_CAY_hoan_thanh * 2
+                        ),
+                        # QUYẾT TOÁN
+                        (
+                            so_luong_BTHP_0CAY_hoan_thanh
+                            + so_luong_BTHP_CAY_hoan_thanh
+                            + so_luong_BTHP_COMBO_hoan_thanh * 2
+                            + so_luong_BTHP_COMBO_0CAY_hoan_thanh * 2
+                            + so_luong_BTHP_COMBO_CAY_hoan_thanh * 2
+                            + so_luong_BTHP_0CAY_den_bu
+                            + so_luong_BTHP_CAY_den_bu
+                            + so_luong_BTHP_COMBO_den_bu * 2
+                            + so_luong_BTHP_COMBO_0CAY_den_bu * 2
+                            + so_luong_BTHP_COMBO_CAY_den_bu * 2
+                        ),
+                        # HOÀN VỀ
+                        (
+                            so_luong_BTHP_0CAY_boom
+                            + so_luong_BTHP_CAY_boom
+                            + so_luong_BTHP_COMBO_boom * 2
+                            + so_luong_BTHP_COMBO_0CAY_boom * 2
+                            + so_luong_BTHP_COMBO_CAY_boom * 2
+                            + so_luong_BTHP_0CAY_hoan_tra
+                            + so_luong_BTHP_CAY_hoan_tra
+                            + so_luong_BTHP_COMBO_hoan_tra * 2
+                            + so_luong_BTHP_COMBO_0CAY_hoan_tra * 2
+                            + so_luong_BTHP_COMBO_CAY_hoan_tra * 2
+                        ),
+                    ],
+                    "BTHP_0CAY": [
+                        so_luong_BTHP_0CAY_hoan_thanh,
+                        so_luong_BTHP_0CAY_hoan_thanh + so_luong_BTHP_0CAY_den_bu,
+                        so_luong_BTHP_0CAY_boom + so_luong_BTHP_0CAY_hoan_tra,
+                    ],
+                    "BTHP_CAY": [
+                        so_luong_BTHP_CAY_hoan_thanh,
+                        so_luong_BTHP_CAY_hoan_thanh + so_luong_BTHP_CAY_den_bu,
+                        so_luong_BTHP_CAY_boom + so_luong_BTHP_CAY_hoan_tra,
+                    ],
+                    "BTHP_COMBO": [
+                        so_luong_BTHP_COMBO_hoan_thanh,
+                        so_luong_BTHP_COMBO_hoan_thanh + so_luong_BTHP_COMBO_den_bu,
+                        so_luong_BTHP_COMBO_boom + so_luong_BTHP_COMBO_hoan_tra,
+                    ],
+                    "BTHP_COMBO_0CAY": [
+                        so_luong_BTHP_COMBO_0CAY_hoan_thanh,
+                        so_luong_BTHP_COMBO_0CAY_hoan_thanh
+                        + so_luong_BTHP_COMBO_0CAY_den_bu,
+                        so_luong_BTHP_COMBO_0CAY_boom
+                        + so_luong_BTHP_COMBO_0CAY_hoan_tra,
+                    ],
+                    "BTHP_COMBO_CAY": [
+                        so_luong_BTHP_COMBO_CAY_hoan_thanh,
+                        so_luong_BTHP_COMBO_CAY_hoan_thanh
+                        + so_luong_BTHP_COMBO_CAY_den_bu,
+                        so_luong_BTHP_COMBO_CAY_boom + so_luong_BTHP_COMBO_CAY_hoan_tra,
                     ],
                 },
                 index=["HOÀN THÀNH", "QUYẾT TOÁN", "HOÀN VỀ"],
@@ -661,36 +1122,50 @@ if process_btn:
             tiktok_values = bang_thong_ke_don_hang_tiktok.loc["Tiktok", labels].values
 
             df_bar = pd.DataFrame({"Loại đơn hàng": labels, "Số lượng": tiktok_values})
-
+            # Gán màu riêng cho "ĐƠN QUYẾT TOÁN"
+            color_map = {"ĐƠN QUYẾT TOÁN": "green"}
             # Biểu đồ cột
             fig_bar_tiktok = px.bar(
                 df_bar,
                 x="Loại đơn hàng",
                 y="Số lượng",
+                color="Loại đơn hàng",
+                color_discrete_map=color_map,
                 title="Số lượng các loại đơn hàng TikTok",
                 text_auto=True,
                 labels={"Loại đơn hàng": "Loại đơn", "Số lượng": "Số đơn"},
             )
 
-            # Biểu đồ tròn Hoàn Thành
-            fig_pie_hoan_thanh = px.pie(
-                names=["SCx1", "SCx2", "SC COMBO"],
+            # Biểu đồ tròn Quyết Toán
+            fig_pie_quyet_toan_bthp = px.pie(
+                names=[
+                    "BTHP Không Cay",
+                    "BTHP Cay",
+                    "BTHP COMBO",
+                    "COMBO Không Cay",
+                    "COMBO Cay",
+                ],
                 values=[
-                    so_luong_SCx1_tiktok_hoan_thanh,
-                    so_luong_SCx2_tiktok_hoan_thanh,
-                    so_luong_SC_combo_tiktok_hoan_thanh,
+                    so_luong_BTHP_0CAY_hoan_thanh + so_luong_BTHP_CAY_den_bu,
+                    so_luong_BTHP_CAY_hoan_thanh + so_luong_BTHP_CAY_den_bu,
+                    so_luong_BTHP_COMBO_hoan_thanh + so_luong_BTHP_COMBO_den_bu,
+                    so_luong_BTHP_COMBO_0CAY_hoan_thanh
+                    + so_luong_BTHP_COMBO_0CAY_den_bu,
+                    so_luong_BTHP_COMBO_CAY_hoan_thanh + so_luong_BTHP_COMBO_CAY_den_bu,
                 ],
                 title="Tỉ lệ sản phẩm HOÀN THÀNH TikTok",
                 hole=0.4,
             )
 
             # Biểu đồ tròn Quyết Toán
-            fig_pie_quyet_toan = px.pie(
-                names=["SCx1", "SCx2", "SC COMBO"],
+            fig_pie_quyet_toan_sc = px.pie(
+                names=["SCx1", "SCx2", "SC COMBO", "COMBO X1", "COMBO X2"],
                 values=[
                     so_luong_SCx1_tiktok_quyet_toan,
                     so_luong_SCx2_tiktok_quyet_toan,
                     so_luong_SCxCombo_tiktok_quyet_toan,
+                    so_luong_COMBO_SCx1_hoan_thanh + so_luong_COMBO_SCx1_den_bu,
+                    so_luong_COMBO_SCx2_hoan_thanh + so_luong_COMBO_SCx2_den_bu,
                 ],
                 title="Tỉ lệ sản phẩm QUYẾT TOÁN TikTok",
                 hole=0.4,
@@ -703,10 +1178,13 @@ if process_btn:
             st.session_state["bang_thong_ke_so_luong_tiktok"] = (
                 bang_thong_ke_so_luong_tiktok
             )
+            st.session_state["bang_thong_ke_so_luong_BTHP_tiktok"] = (
+                bang_thong_ke_so_luong_BTHP_tiktok
+            )
             st.session_state["bang_thong_ke_tien_tiktok"] = bang_thong_ke_tien_tiktok
             st.session_state["fig_bar_tiktok"] = fig_bar_tiktok
-            st.session_state["fig_pie_hoan_thanh"] = fig_pie_hoan_thanh
-            st.session_state["fig_pie_quyet_toan"] = fig_pie_quyet_toan
+            st.session_state["fig_pie_quyet_toan_bthp"] = fig_pie_quyet_toan_bthp
+            st.session_state["fig_pie_quyet_toan_sc"] = fig_pie_quyet_toan_sc
             st.session_state.processing = True
 
 # --- Hiển thị kết quả nếu đã xử lý ---
@@ -722,33 +1200,35 @@ if st.session_state.processing:
         st.markdown("#### 📋 Bảng Thống Kê Tiền Hàng")
         st.dataframe(st.session_state["bang_thong_ke_tien_tiktok"])
 
-    col1, col2 = st.columns(2)
-    with col1:
+    with st.container():
         st.markdown("#### 📋 Bảng Thống Kê Đơn Hàng")
         st.dataframe(st.session_state["bang_thong_ke_don_hang_tiktok"])
 
-    with col2:
-        st.markdown("#### 📈 Biểu Đồ Số Lượng Đơn Hàng")
-        st.plotly_chart(st.session_state["fig_bar_tiktok"], use_container_width=True)
+    st.markdown("#### 📈 Biểu Đồ Số Lượng Đơn Hàng")
+    st.plotly_chart(st.session_state["fig_bar_tiktok"], use_container_width=True)
+
+    col3, col4 = st.columns(2)
+    with col3:
+        st.markdown("#### 📋 Bảng Thống Kê Sản Phẩm SỐT CHẤM")
+        st.dataframe(st.session_state["bang_thong_ke_so_luong_tiktok"])
+
+    with col4:
+        st.markdown("#### 📋 Bảng Thống Kê Sản Phẩm BÁNH TRÁNG HÀNH PHI")
+        st.dataframe(st.session_state["bang_thong_ke_so_luong_BTHP_tiktok"])
 
     # Hiển thị thống kê sản phẩm
     st.markdown("### 📊 SỐ LƯỢNG SẢN PHẨM")
-    col4, col5, col6 = st.columns(3)
-
-    with col4:
-        st.markdown("#### 📋 Bảng Thống Kê Sản Phẩm")
-        st.dataframe(st.session_state["bang_thong_ke_so_luong_tiktok"])
-
+    col5, col6 = st.columns(2)
     with col5:
-        st.markdown("#### 📈 Biểu Đồ Hoàn Thành")
+        st.markdown("#### 📈 Biểu Đồ Quyết Toán Sốt Chấm")
         st.plotly_chart(
-            st.session_state["fig_pie_hoan_thanh"], use_container_width=True
+            st.session_state["fig_pie_quyet_toan_sc"], use_container_width=True
         )
 
     with col6:
-        st.markdown("#### 📈 Biểu Đồ Quyết Toán")
+        st.markdown("#### 📈 Biểu Đồ Quyết Toán Bánh Tráng Hành Phi")
         st.plotly_chart(
-            st.session_state["fig_pie_quyet_toan"], use_container_width=True
+            st.session_state["fig_pie_quyet_toan_bthp"], use_container_width=True
         )
 
     st.markdown("### 🔍 Xem chi tiết theo loại đơn hàng")
@@ -789,7 +1269,7 @@ mapping = {
     "ĐƠN ĐIỀU CHỈNH": st.session_state.get("Don_dieu_chinh", pd.DataFrame()),
 }
 
-# Lấy dữ liệu theo loại đơn đã chọn
+
 df_chi_tiet = mapping.get(loai_don, pd.DataFrame())
 
 # Hiển thị kết quả
