@@ -1119,6 +1119,10 @@ if process_btn:
                             + so_luong_SC_combo_tiktok_hoan_thanh * 2
                             + so_luong_COMBO_SCx1_hoan_thanh * 2
                             + so_luong_COMBO_SCx2_hoan_thanh * 2
+                            + (
+                                soluong_COMBO_BTHP_SCx1_hoan_thanh
+                                + soluong_COMBO_BTHP_SCx2_hoan_thanh
+                            )
                         ),
                         (
                             so_luong_SCx1_tiktok_hoan_thanh
@@ -1131,6 +1135,22 @@ if process_btn:
                             + so_luong_COMBO_SCx2_den_bu * 2
                             + so_luong_SC_combo_tiktok_hoan_thanh * 2
                             + So_luong_SC_Combo_den_bu * 2
+                            + (
+                                soluong_COMBO_BTHP_SCx1_hoan_thanh
+                                + soluong_COMBO_BTHP_SCx1_den_bu
+                            )
+                            + (
+                                soluong_COMBO_BTHP_SCx2_hoan_thanh
+                                + soluong_COMBO_BTHP_SCx2_den_bu
+                            )
+                            + (
+                                soluong_COMBO_BTHP_SCx1_boom
+                                + soluong_COMBO_BTHP_SCx1_hoan_tra
+                            )
+                            + (
+                                soluong_COMBO_BTHP_SCx2_boom
+                                + soluong_COMBO_BTHP_SCx2_hoan_tra
+                            )
                         ),
                         (
                             So_luong_SC_X1_boom
