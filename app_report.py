@@ -184,6 +184,9 @@ def process_tiktok_daily_report(df_all, df_income):
         r"^(BTHP_COMBO_Cay|BTHP003_combo_cay)$": "BTHP-COMBO-CAY",
         r"^BTHP-COMBO\+SC_X1$": "COMBO_BTHP_SCx1",
         r"^BTHP-COMBO\+SC_X2$": "COMBO_BTHP_SCx2",
+        r"^BTHP_COMBO_MIX\+SC_X1$": "COMBO_BTHP_SCx1",
+        r"^BTHP_COMBO_MIX\+SC_X2$": "COMBO_BTHP_SCx2",
+        r"^(BTHP-2Cay-2KhongCay)$": "COMBO_4BTHP",
     }
 
     for pattern, replacement in replacements.items():
