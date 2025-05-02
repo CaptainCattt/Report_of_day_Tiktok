@@ -172,19 +172,18 @@ def process_tiktok_daily_report(df_all, df_income):
 
     # Danh sách các mẫu thay thế
     replacements = {
-        r"^(COMBO-SC-ANHDUC|COMBO-SC-NGOCTRINH|COMBO-SC-MIX|SC_COMBO_MIX|SC_COMBO_MIX_LIVESTREAM|COMBO-SC_LIVESTREAM)": "COMBO-SC",
-        r"^(SC_X1)": "SC-450g",
-        r"^(SC_X2)": "SC-x2-450g",
-        r"^(SC_COMBO_X1|COMBO-CAYVUA-X1|SC_COMBO_X1_LIVESTREAM|COMBO-SCX1_LIVESTREAM)": "COMBO-SCX1",
-        r"^(SC_COMBO_X2|COMBO-SIEUCAY-X2|SC_COMBO_X2_LIVESTREAM|COMBO-SCX2_LIVESTREAM)": "COMBO-SCX2",
-        r"^(BTHP-Cay-200gr|BTHP_Cay)": "BTHP-CAY",
-        r"^(BTHP-200gr|BTHP_KhongCay)": "BTHP-0CAY",
-        r"^(BTHP_COMBO_MIX|BTHP003_combo_mix)": "BTHP-COMBO",
-        r"^(BTHP_COMBO_KhongCay|BTHP003_combo_kocay)": "BTHP-COMBO-0CAY",
-        r"^(BTHP_COMBO_Cay|BTHP003_combo_cay)": "BTHP-COMBO-CAY",
-        r"^(BTHP-COMBO\+SC_X1)": "COMBO_BTHP_SCx1",
-        r"^(BTHP-COMBO\+SC_X2)": "COMBO_BTHP_SCx2",
-        r"^(BTHP-2Cay-2KhongCay)": "COMBO_4BTHP",
+        r"^(COMBO-SC-ANHDUC|COMBO-SC-NGOCTRINH|COMBO-SC-MIX|SC_COMBO_MIX|SC_COMBO_MIX_LIVESTREAM|COMBO-SC_LIVESTREAM)$": "COMBO-SC",
+        r"^SC_X1$": "SC-450g",
+        r"^SC_X2$": "SC-x2-450g",
+        r"^(SC_COMBO_X1|COMBO-CAYVUA-X1|SC_COMBO_X1_LIVESTREAM|COMBO-SCX1|COMBO-SCX1_LIVESTREAM)$": "COMBO-SCX1",
+        r"^(SC_COMBO_X2|COMBO-SIEUCAY-X2|SC_COMBO_X2_LIVESTREAM|COMBO-SCX2|COMBO-SCX2_LIVESTREAM)$": "COMBO-SCX2",
+        r"^(BTHP-Cay-200gr|BTHP_Cay)$": "BTHP-CAY",
+        r"^(BTHP-200gr|BTHP_KhongCay)$": "BTHP-0CAY",
+        r"^(BTHP_COMBO_MIX|BTHP003_combo_mix)$": "BTHP-COMBO",
+        r"^(BTHP_COMBO_KhongCay|BTHP003_combo_kocay)$": "BTHP-COMBO-0CAY",
+        r"^(BTHP_COMBO_Cay|BTHP003_combo_cay)$": "BTHP-COMBO-CAY",
+        r"^BTHP-COMBO\+SC_X1$": "COMBO_BTHP_SCx1",
+        r"^BTHP-COMBO\+SC_X2$": "COMBO_BTHP_SCx2",
     }
 
     for pattern, replacement in replacements.items():
@@ -1182,6 +1181,9 @@ if process_btn:
                             + so_luong_BTHP_COMBO_hoan_thanh * 2
                             + so_luong_BTHP_COMBO_0CAY_hoan_thanh * 2
                             + so_luong_BTHP_COMBO_CAY_hoan_thanh * 2
+                            + soluong_COMBO_BTHP_SCx1_hoan_thanh * 2
+                            + soluong_COMBO_BTHP_SCx2_hoan_thanh * 2
+                            + soluong_COMBO_4BTHP_hoan_thanh * 4
                         ),
                         # QUYẾT TOÁN
                         (
@@ -1190,11 +1192,17 @@ if process_btn:
                             + so_luong_BTHP_COMBO_hoan_thanh * 2
                             + so_luong_BTHP_COMBO_0CAY_hoan_thanh * 2
                             + so_luong_BTHP_COMBO_CAY_hoan_thanh * 2
+                            + soluong_COMBO_BTHP_SCx1_hoan_thanh * 2
+                            + soluong_COMBO_BTHP_SCx2_hoan_thanh * 2
+                            + soluong_COMBO_4BTHP_hoan_thanh * 4
                             + so_luong_BTHP_0CAY_den_bu
                             + so_luong_BTHP_CAY_den_bu
                             + so_luong_BTHP_COMBO_den_bu * 2
                             + so_luong_BTHP_COMBO_0CAY_den_bu * 2
                             + so_luong_BTHP_COMBO_CAY_den_bu * 2
+                            + soluong_COMBO_BTHP_SCx1_den_bu * 2
+                            + soluong_COMBO_BTHP_SCx2_den_bu * 2
+                            + soluong_COMBO_4BTHP_den_bu * 4
                         ),
                         # HOÀN VỀ
                         (
@@ -1203,11 +1211,17 @@ if process_btn:
                             + so_luong_BTHP_COMBO_boom * 2
                             + so_luong_BTHP_COMBO_0CAY_boom * 2
                             + so_luong_BTHP_COMBO_CAY_boom * 2
+                            + soluong_COMBO_BTHP_SCx1_boom * 2
+                            + soluong_COMBO_BTHP_SCx2_boom * 2
+                            + soluong_COMBO_4BTHP_boom * 4
                             + so_luong_BTHP_0CAY_hoan_tra
                             + so_luong_BTHP_CAY_hoan_tra
                             + so_luong_BTHP_COMBO_hoan_tra * 2
                             + so_luong_BTHP_COMBO_0CAY_hoan_tra * 2
                             + so_luong_BTHP_COMBO_CAY_hoan_tra * 2
+                            + soluong_COMBO_BTHP_SCx1_hoan_tra * 2
+                            + soluong_COMBO_BTHP_SCx2_hoan_tra * 2
+                            + soluong_COMBO_4BTHP_hoan_tra * 4
                         ),
                     ],
                     "BTHP_0CAY": [
@@ -1253,7 +1267,7 @@ if process_btn:
                     "COMBO_4_BTHP": [
                         soluong_COMBO_4BTHP_hoan_thanh,
                         soluong_COMBO_4BTHP_hoan_thanh + soluong_COMBO_4BTHP_den_bu,
-                        soluong_COMBO_4BTHP_boom + soluong_COMBO_BTHP_SCx1_hoan_tra,
+                        soluong_COMBO_4BTHP_boom + soluong_COMBO_4BTHP_hoan_tra,
                     ],
                 },
                 index=["HOÀN THÀNH", "QUYẾT TOÁN", "HOÀN VỀ"],
