@@ -7,13 +7,13 @@ import io
 
 def process_tiktok_daily_report(df_all, df_income):
 
-    VonX1 = 43741.24
-    VonX2 = 46041.24
-    VonCombo = 89782.48
+    VonX1 = 41691.24
+    VonX2 = 44175.24
+    VonCombo = 85866.48
 
     VonBTHP_0CAY = 24024.00
     VonBTHP_CAY = 24024.00
-    VonBTHP_COMBO = 24024.00
+    VonBTHP_COMBO = 24024.00 * 2
 
     df_income.columns = df_income.columns.str.strip()
     df_income["ABS_Total_Fees"] = df_income["Total fees"].abs()
@@ -755,15 +755,17 @@ def process_tiktok_daily_report(df_all, df_income):
         + So_luong_SC_X1_den_bu
         + so_luong_COMBO_SCx1_hoan_thanh * 2
         + so_luong_COMBO_SCx1_den_bu * 2
+        + (soluong_COMBO_BTHP_SCx1_hoan_thanh + soluong_COMBO_BTHP_SCx1_den_bu)
     )
     so_luong_SCx2_tiktok_quyet_toan = (
         so_luong_SCx2_tiktok_hoan_thanh
         + So_luong_SC_X2_den_bu
         + so_luong_COMBO_SCx2_hoan_thanh * 2
         + so_luong_COMBO_SCx2_den_bu * 2
+        + (soluong_COMBO_BTHP_SCx2_hoan_thanh + soluong_COMBO_BTHP_SCx2_den_bu)
     )
     so_luong_SCxCombo_tiktok_quyet_toan = (
-        so_luong_SC_combo_tiktok_hoan_thanh * 2 + So_luong_SC_Combo_den_bu * 2
+        so_luong_SC_combo_tiktok_hoan_thanh + So_luong_SC_Combo_den_bu
     )
 
     Tong_BTHP_hoan_ve = (
@@ -772,11 +774,18 @@ def process_tiktok_daily_report(df_all, df_income):
         + so_luong_BTHP_COMBO_boom * 2
         + so_luong_BTHP_COMBO_0CAY_boom * 2
         + so_luong_BTHP_COMBO_CAY_boom * 2
+        + soluong_COMBO_4BTHP_boom * 4
+        + soluong_COMBO_BTHP_SCx1_boom * 2
+        + soluong_COMBO_BTHP_SCx2_boom * 2
+        ###
         + so_luong_BTHP_0CAY_hoan_tra
         + so_luong_BTHP_CAY_hoan_tra
         + so_luong_BTHP_COMBO_hoan_tra * 2
         + so_luong_BTHP_COMBO_0CAY_hoan_tra * 2
         + so_luong_BTHP_COMBO_CAY_hoan_tra * 2
+        + soluong_COMBO_4BTHP_hoan_tra * 4
+        + soluong_COMBO_BTHP_SCx1_hoan_tra * 2
+        + soluong_COMBO_BTHP_SCx2_hoan_tra * 2
     )
 
     Tong_von_SC = (
@@ -785,10 +794,31 @@ def process_tiktok_daily_report(df_all, df_income):
         + so_luong_SCxCombo_tiktok_quyet_toan * VonCombo
     )
 
+    TienVonBTHP_0CAY = (
+        so_luong_BTHP_0CAY_hoan_thanh
+        + so_luong_BTHP_0CAY_den_bu
+        + (so_luong_BTHP_COMBO_0CAY_hoan_thanh + so_luong_BTHP_COMBO_0CAY_den_bu) * 2
+    )
+    TienVonBTHP_CAY = (
+        so_luong_BTHP_CAY_hoan_thanh
+        + so_luong_BTHP_CAY_den_bu
+        + (so_luong_BTHP_COMBO_CAY_hoan_thanh + so_luong_BTHP_COMBO_CAY_den_bu) * 2
+    )
+    TienVonBTHP_COMBO = (
+        so_luong_BTHP_COMBO_hoan_thanh
+        + so_luong_BTHP_COMBO_den_bu
+        + soluong_COMBO_BTHP_SCx1_hoan_thanh
+        + soluong_COMBO_BTHP_SCx1_den_bu
+        + soluong_COMBO_BTHP_SCx2_hoan_thanh
+        + soluong_COMBO_BTHP_SCx2_den_bu
+        + soluong_COMBO_4BTHP_hoan_thanh * 2
+        + soluong_COMBO_4BTHP_den_bu * 2
+    )
+
     Tong_von_BTHP = (
-        (so_luong_BTHP_0CAY_hoan_thanh + so_luong_BTHP_0CAY_den_bu) * VonBTHP_0CAY
-        + (so_luong_BTHP_CAY_hoan_thanh + so_luong_BTHP_CAY_den_bu) * VonBTHP_CAY
-        + (so_luong_BTHP_COMBO_hoan_thanh + so_luong_BTHP_COMBO_den_bu) * VonBTHP_COMBO
+        TienVonBTHP_0CAY * VonBTHP_0CAY
+        + TienVonBTHP_CAY * VonBTHP_CAY
+        + TienVonBTHP_COMBO * VonBTHP_COMBO
     )
 
     return (
@@ -1105,7 +1135,7 @@ if process_btn:
                     "TỔNG VỐN SỐT CHẤM": [Tong_von_SC],
                     "TỔNG VỐN BÁNH TRÁNG": [Tong_von_BTHP],
                     "TỔNG VỐN": [Tong_von_SC + Tong_von_BTHP],
-                    "LỢI NHUẬN": [Tong_tien_quyet_toan - Tong_von_SC],
+                    "LỢI NHUẬN": [Tong_tien_quyet_toan - (Tong_von_SC + Tong_von_BTHP)],
                 },
                 index=["Tiktok"],
             )
