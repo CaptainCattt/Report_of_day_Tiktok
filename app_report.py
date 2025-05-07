@@ -272,7 +272,6 @@ def process_tiktok_daily_report(df_all, df_income):
     # Don hoan tra
     Don_hoan_tra = df_merged[
         (df_merged["Type"] == "Order")
-        & (df_merged["Total revenue"] <= 0)
         & (df_merged["Sku Quantity of return"] != 0)
         & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
         & (df_merged["Classify"] == "Not Duplicate")
@@ -315,7 +314,6 @@ def process_tiktok_daily_report(df_all, df_income):
 
     SC_X1_hoan_tra = df_merged[
         (df_merged["Type"] == "Order")
-        & (df_merged["Total revenue"] <= 0)
         & (df_merged["Sku Quantity of return"] != 0)
         & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
         & (df_merged["Classify"] == "Not Duplicate")
@@ -324,7 +322,6 @@ def process_tiktok_daily_report(df_all, df_income):
 
     SC_X2_hoan_tra = df_merged[
         (df_merged["Type"] == "Order")
-        & (df_merged["Total revenue"] <= 0)
         & (df_merged["Sku Quantity of return"] != 0)
         & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
         & (df_merged["Classify"] == "Not Duplicate")
@@ -333,7 +330,6 @@ def process_tiktok_daily_report(df_all, df_income):
 
     SC_COMBO_hoan_tra = df_merged[
         (df_merged["Type"] == "Order")
-        & (df_merged["Total revenue"] <= 0)
         & (df_merged["Sku Quantity of return"] != 0)
         & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
         & (df_merged["Classify"] == "Not Duplicate")
@@ -377,15 +373,21 @@ def process_tiktok_daily_report(df_all, df_income):
 
     # Đếm số lượng sản phẩm theo SKU Category
     SCx1_tiktok_hoan_thanh = df_merged[
-        (df_merged["SKU Category"] == "SC-450g") & (df_merged["Total revenue"] > 0)
+        (df_merged["SKU Category"] == "SC-450g")
+        & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     SCx2_tiktok_hoan_thanh = df_merged[
-        (df_merged["SKU Category"] == "SC-x2-450g") & (df_merged["Total revenue"] > 0)
+        (df_merged["SKU Category"] == "SC-x2-450g")
+        & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     SC_combo_tiktok_hoan_thanh = df_merged[
-        (df_merged["SKU Category"] == "COMBO-SC") & (df_merged["Total revenue"] > 0)
+        (df_merged["SKU Category"] == "COMBO-SC")
+        & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     so_luong_SCx1_tiktok_hoan_thanh = SCx1_tiktok_hoan_thanh["Quantity"].sum()
@@ -394,11 +396,15 @@ def process_tiktok_daily_report(df_all, df_income):
 
     # BÁNH TRÁNG và COMBO mới
     COMBO_SCx1_hoan_thanh = df_merged[
-        (df_merged["SKU Category"] == "COMBO-SCX1") & (df_merged["Total revenue"] > 0)
+        (df_merged["SKU Category"] == "COMBO-SCX1")
+        & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     COMBO_SCx2_hoan_thanh = df_merged[
-        (df_merged["SKU Category"] == "COMBO-SCX2") & (df_merged["Total revenue"] > 0)
+        (df_merged["SKU Category"] == "COMBO-SCX2")
+        & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     so_luong_COMBO_SCx1_hoan_thanh = COMBO_SCx1_hoan_thanh["Quantity"].sum()
@@ -427,7 +433,6 @@ def process_tiktok_daily_report(df_all, df_income):
 
     COMBO_SCx1_hoan_tra = df_merged[
         (df_merged["Type"] == "Order")
-        & (df_merged["Total revenue"] <= 0)
         & (df_merged["Sku Quantity of return"] != 0)
         & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
         & (df_merged["Classify"] == "Not Duplicate")
@@ -436,7 +441,6 @@ def process_tiktok_daily_report(df_all, df_income):
 
     COMBO_SCx2_hoan_tra = df_merged[
         (df_merged["Type"] == "Order")
-        & (df_merged["Total revenue"] <= 0)
         & (df_merged["Sku Quantity of return"] != 0)
         & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
         & (df_merged["Classify"] == "Not Duplicate")
@@ -466,25 +470,33 @@ def process_tiktok_daily_report(df_all, df_income):
     # BÁNH TRÁNG
     # BTHP-0CAY, BTHP-CAY, BTHP-COMBO, BTHP-COMBO-0CAY, BTHP-COMBO-CAY
     BTHP_0CAY_hoan_thanh = df_merged[
-        (df_merged["SKU Category"] == "BTHP-0CAY") & (df_merged["Total revenue"] > 0)
+        (df_merged["SKU Category"] == "BTHP-0CAY")
+        & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     BTHP_CAY_hoan_thanh = df_merged[
-        (df_merged["SKU Category"] == "BTHP-CAY") & (df_merged["Total revenue"] > 0)
+        (df_merged["SKU Category"] == "BTHP-CAY")
+        & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     BTHP_COMBO_hoan_thanh = df_merged[
-        (df_merged["SKU Category"] == "BTHP-COMBO") & (df_merged["Total revenue"] > 0)
+        (df_merged["SKU Category"] == "BTHP-COMBO")
+        & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     BTHP_COMBO_0CAY_hoan_thanh = df_merged[
         (df_merged["SKU Category"] == "BTHP-COMBO-0CAY")
         & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     BTHP_COMBO_CAY_hoan_thanh = df_merged[
         (df_merged["SKU Category"] == "BTHP-COMBO-CAY")
         & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     so_luong_BTHP_0CAY_hoan_thanh = BTHP_0CAY_hoan_thanh["Quantity"].sum()
@@ -550,7 +562,6 @@ def process_tiktok_daily_report(df_all, df_income):
 
     BTHP_0CAY_hoan_tra = df_merged[
         (df_merged["Type"] == "Order")
-        & (df_merged["Total revenue"] <= 0)
         & (df_merged["Sku Quantity of return"] != 0)
         & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
         & (df_merged["Classify"] == "Not Duplicate")
@@ -559,7 +570,6 @@ def process_tiktok_daily_report(df_all, df_income):
 
     BTHP_CAY_hoan_tra = df_merged[
         (df_merged["Type"] == "Order")
-        & (df_merged["Total revenue"] <= 0)
         & (df_merged["Sku Quantity of return"] != 0)
         & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
         & (df_merged["Classify"] == "Not Duplicate")
@@ -568,7 +578,6 @@ def process_tiktok_daily_report(df_all, df_income):
 
     BTHP_COMBO_hoan_tra = df_merged[
         (df_merged["Type"] == "Order")
-        & (df_merged["Total revenue"] <= 0)
         & (df_merged["Sku Quantity of return"] != 0)
         & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
         & (df_merged["Classify"] == "Not Duplicate")
@@ -577,7 +586,6 @@ def process_tiktok_daily_report(df_all, df_income):
 
     BTHP_COMBO_0CAY_hoan_tra = df_merged[
         (df_merged["Type"] == "Order")
-        & (df_merged["Total revenue"] <= 0)
         & (df_merged["Sku Quantity of return"] != 0)
         & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
         & (df_merged["Classify"] == "Not Duplicate")
@@ -586,7 +594,6 @@ def process_tiktok_daily_report(df_all, df_income):
 
     BTHP_COMBO_CAY_hoan_tra = df_merged[
         (df_merged["Type"] == "Order")
-        & (df_merged["Total revenue"] <= 0)
         & (df_merged["Sku Quantity of return"] != 0)
         & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
         & (df_merged["Classify"] == "Not Duplicate")
@@ -649,11 +656,13 @@ def process_tiktok_daily_report(df_all, df_income):
     COMBO_BTHP_SCx1_hoan_thanh = df_merged[
         (df_merged["SKU Category"] == "COMBO_BTHP_SCx1")
         & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     COMBO_BTHP_SCx2_hoan_thanh = df_merged[
         (df_merged["SKU Category"] == "COMBO_BTHP_SCx2")
         & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     COMBO_BTHP_SCx1_den_bu = df_merged[
@@ -716,7 +725,9 @@ def process_tiktok_daily_report(df_all, df_income):
     soluong_COMBO_BTHP_SCx2_boom = COMBO_BTHP_SCx2_boom["Quantity"].sum()
 
     COMBO_4BTHP_hoan_thanh = df_merged[
-        (df_merged["SKU Category"] == "COMBO_4BTHP") & (df_merged["Total revenue"] > 0)
+        (df_merged["SKU Category"] == "COMBO_4BTHP")
+        & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
     ]
 
     COMBO_4BTHP_den_bu = df_merged[
