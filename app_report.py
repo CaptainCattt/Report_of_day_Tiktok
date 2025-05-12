@@ -187,6 +187,8 @@ def process_tiktok_daily_report(df_all, df_income):
         r"^BTHP_COMBO_MIX\+SC_X1$": "COMBO_BTHP_SCx1",
         r"^BTHP_COMBO_MIX\+SC_X2$": "COMBO_BTHP_SCx2",
         r"^(BTHP-2Cay-2KhongCay)$": "COMBO_4BTHP",
+        r"^(BTHP-4Hu-KhongCay)$": "4BTHP_0CAY",
+        r"^(BTHP-4Hu-Cay)$": "4BTHP_CAY",
     }
 
     for pattern, replacement in replacements.items():
@@ -760,6 +762,83 @@ def process_tiktok_daily_report(df_all, df_income):
     soluong_COMBO_4BTHP_hoan_tra = COMBO_4BTHP_hoan_tra["Quantity"].sum()
     soluong_COMBO_4BTHP_boom = COMBO_4BTHP_boom["Quantity"].sum()
 
+    # Combo 4_BTHP_0CAY và 4_BTHP_CAY
+    COMBO_4_BTHP_0CAY_hoan_thanh = df_merged[
+        (df_merged["SKU Category"] == "4BTHP_0CAY")
+        & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
+    ]
+
+    COMBO_4_BTHP_CAY_hoan_thanh = df_merged[
+        (df_merged["SKU Category"] == "4BTHP_CAY")
+        & (df_merged["Total revenue"] > 0)
+        & (df_merged["Actually Order Type"] == "Normal")
+    ]
+
+    COMBO_4_BTHP_0CAY_den_bu = df_merged[
+        (
+            df_merged["Type"].isin(
+                ["Logistics reimbursement", "Platform reimbursement"]
+            )
+            & (df_merged["SKU Category"] == "4BTHP_0CAY")
+        )
+    ]
+
+    COMBO_4_BTHP_CAY_den_bu = df_merged[
+        (
+            df_merged["Type"].isin(
+                ["Logistics reimbursement", "Platform reimbursement"]
+            )
+            & (df_merged["SKU Category"] == "4BTHP_CAY")
+        )
+    ]
+
+    COMBO_4_BTHP_0CAY_hoan_tra = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
+        & (df_merged["Classify"] == "Not Duplicate")
+        & (df_merged["SKU Category"] == "4BTHP_0CAY")
+    ]
+
+    COMBO_4_BTHP_CAY_hoan_tra = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["Sku Quantity of return"] != 0)
+        & (df_merged["Cancelation/Return Type"].isin(["Return/Refund", ""]))
+        & (df_merged["Classify"] == "Not Duplicate")
+        & (df_merged["SKU Category"] == "4BTHP_CAY")
+    ]
+
+    COMBO_4_BTHP_0CAY_boom = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Cancelation/Return Type"] == "Cancel")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["SKU Category"] == "4BTHP_0CAY")
+    ]
+
+    COMBO_4_BTHP_CAY_boom = df_merged[
+        (df_merged["Type"] == "Order")
+        & (df_merged["Cancelation/Return Type"] == "Cancel")
+        & (df_merged["Total revenue"] <= 0)
+        & (df_merged["SKU Category"] == "4BTHP_CAY")
+    ]
+
+    soluong_COMBO_4_BTHP_0CAY_hoan_thanh = COMBO_4_BTHP_0CAY_hoan_thanh[
+        "Quantity"
+    ].sum()
+    soluong_COMBO_4_BTHP_CAY_hoan_thanh = COMBO_4_BTHP_CAY_hoan_thanh["Quantity"].sum()
+
+    soluong_COMBO_4_BTHP_0CAY_den_bu = COMBO_4_BTHP_0CAY_den_bu["Quantity"].sum()
+    soluong_COMBO_4_BTHP_CAY_den_bu = COMBO_4_BTHP_CAY_den_bu["Quantity"].sum()
+
+    soluong_COMBO_4_BTHP_0CAY_hoan_tra = COMBO_4_BTHP_0CAY_hoan_tra["Quantity"].sum()
+    soluong_COMBO_4_BTHP_CAY_hoan_tra = COMBO_4_BTHP_CAY_hoan_tra["Quantity"].sum()
+
+    soluong_COMBO_4_BTHP_0CAY_boom = COMBO_4_BTHP_0CAY_boom["Quantity"].sum()
+    soluong_COMBO_4_BTHP_CAY_boom = COMBO_4_BTHP_CAY_boom["Quantity"].sum()
+
     # Tính toán tổng số lượng sản phẩm hoàn thành và quyết toán
     so_luong_SCx1_tiktok_quyet_toan = (
         so_luong_SCx1_tiktok_hoan_thanh
@@ -788,6 +867,8 @@ def process_tiktok_daily_report(df_all, df_income):
         + soluong_COMBO_4BTHP_boom * 4
         + soluong_COMBO_BTHP_SCx1_boom * 2
         + soluong_COMBO_BTHP_SCx2_boom * 2
+        + soluong_COMBO_4_BTHP_0CAY_boom * 4
+        + soluong_COMBO_4_BTHP_CAY_boom * 4
         ###
         + so_luong_BTHP_0CAY_hoan_tra
         + so_luong_BTHP_CAY_hoan_tra
@@ -797,6 +878,8 @@ def process_tiktok_daily_report(df_all, df_income):
         + soluong_COMBO_4BTHP_hoan_tra * 4
         + soluong_COMBO_BTHP_SCx1_hoan_tra * 2
         + soluong_COMBO_BTHP_SCx2_hoan_tra * 2
+        + soluong_COMBO_4_BTHP_0CAY_hoan_tra * 4
+        + soluong_COMBO_4_BTHP_CAY_hoan_tra * 4
     )
 
     Tong_von_SC = (
@@ -824,6 +907,10 @@ def process_tiktok_daily_report(df_all, df_income):
         + soluong_COMBO_BTHP_SCx2_den_bu
         + soluong_COMBO_4BTHP_hoan_thanh * 2
         + soluong_COMBO_4BTHP_den_bu * 2
+        + soluong_COMBO_4_BTHP_0CAY_hoan_thanh * 2
+        + soluong_COMBO_4_BTHP_CAY_hoan_thanh * 2
+        + soluong_COMBO_4_BTHP_0CAY_den_bu * 2
+        + soluong_COMBO_4_BTHP_CAY_den_bu * 2
     )
 
     Tong_von_BTHP = (
@@ -833,6 +920,15 @@ def process_tiktok_daily_report(df_all, df_income):
     )
 
     return (
+        soluong_COMBO_4_BTHP_0CAY_hoan_thanh,
+        soluong_COMBO_4_BTHP_CAY_hoan_thanh,
+        soluong_COMBO_4_BTHP_0CAY_den_bu,
+        soluong_COMBO_4_BTHP_CAY_den_bu,
+        soluong_COMBO_4_BTHP_0CAY_hoan_tra,
+        soluong_COMBO_4_BTHP_CAY_hoan_tra,
+        soluong_COMBO_4_BTHP_0CAY_boom,
+        soluong_COMBO_4_BTHP_CAY_boom,
+        ###
         soluong_COMBO_4BTHP_hoan_thanh,
         soluong_COMBO_4BTHP_den_bu,
         soluong_COMBO_4BTHP_hoan_tra,
@@ -1030,6 +1126,15 @@ if process_btn:
 
             # Process dữ liệu
             (
+                soluong_COMBO_4_BTHP_0CAY_hoan_thanh,
+                soluong_COMBO_4_BTHP_CAY_hoan_thanh,
+                soluong_COMBO_4_BTHP_0CAY_den_bu,
+                soluong_COMBO_4_BTHP_CAY_den_bu,
+                soluong_COMBO_4_BTHP_0CAY_hoan_tra,
+                soluong_COMBO_4_BTHP_CAY_hoan_tra,
+                soluong_COMBO_4_BTHP_0CAY_boom,
+                soluong_COMBO_4_BTHP_CAY_boom,
+                ###
                 soluong_COMBO_4BTHP_hoan_thanh,
                 soluong_COMBO_4BTHP_den_bu,
                 soluong_COMBO_4BTHP_hoan_tra,
@@ -1248,6 +1353,8 @@ if process_btn:
                             + soluong_COMBO_BTHP_SCx1_hoan_thanh * 2
                             + soluong_COMBO_BTHP_SCx2_hoan_thanh * 2
                             + soluong_COMBO_4BTHP_hoan_thanh * 4
+                            + soluong_COMBO_4_BTHP_0CAY_hoan_thanh * 4
+                            + soluong_COMBO_4_BTHP_CAY_hoan_thanh * 4
                         ),
                         # QUYẾT TOÁN
                         (
@@ -1259,6 +1366,8 @@ if process_btn:
                             + soluong_COMBO_BTHP_SCx1_hoan_thanh * 2
                             + soluong_COMBO_BTHP_SCx2_hoan_thanh * 2
                             + soluong_COMBO_4BTHP_hoan_thanh * 4
+                            + soluong_COMBO_4_BTHP_0CAY_hoan_thanh * 4
+                            + soluong_COMBO_4_BTHP_CAY_hoan_thanh * 4
                             + so_luong_BTHP_0CAY_den_bu
                             + so_luong_BTHP_CAY_den_bu
                             + so_luong_BTHP_COMBO_den_bu * 2
@@ -1267,6 +1376,8 @@ if process_btn:
                             + soluong_COMBO_BTHP_SCx1_den_bu * 2
                             + soluong_COMBO_BTHP_SCx2_den_bu * 2
                             + soluong_COMBO_4BTHP_den_bu * 4
+                            + soluong_COMBO_4_BTHP_0CAY_den_bu * 4
+                            + soluong_COMBO_4_BTHP_CAY_den_bu * 4
                         ),
                         # HOÀN VỀ
                         (
@@ -1278,6 +1389,8 @@ if process_btn:
                             + soluong_COMBO_BTHP_SCx1_boom * 2
                             + soluong_COMBO_BTHP_SCx2_boom * 2
                             + soluong_COMBO_4BTHP_boom * 4
+                            + soluong_COMBO_4_BTHP_0CAY_boom * 4
+                            + soluong_COMBO_4_BTHP_CAY_boom * 4
                             + so_luong_BTHP_0CAY_hoan_tra
                             + so_luong_BTHP_CAY_hoan_tra
                             + so_luong_BTHP_COMBO_hoan_tra * 2
@@ -1286,6 +1399,8 @@ if process_btn:
                             + soluong_COMBO_BTHP_SCx1_hoan_tra * 2
                             + soluong_COMBO_BTHP_SCx2_hoan_tra * 2
                             + soluong_COMBO_4BTHP_hoan_tra * 4
+                            + soluong_COMBO_4_BTHP_0CAY_hoan_tra * 4
+                            + soluong_COMBO_4_BTHP_CAY_hoan_tra * 4
                         ),
                     ],
                     "BTHP_0CAY": [
@@ -1332,6 +1447,20 @@ if process_btn:
                         soluong_COMBO_4BTHP_hoan_thanh,
                         soluong_COMBO_4BTHP_hoan_thanh + soluong_COMBO_4BTHP_den_bu,
                         soluong_COMBO_4BTHP_boom + soluong_COMBO_4BTHP_hoan_tra,
+                    ],
+                    "COMBO_4_BTHP_0CAY": [
+                        soluong_COMBO_4_BTHP_0CAY_hoan_thanh,
+                        soluong_COMBO_4_BTHP_0CAY_hoan_thanh
+                        + soluong_COMBO_4_BTHP_0CAY_den_bu,
+                        soluong_COMBO_4_BTHP_0CAY_boom
+                        + soluong_COMBO_4_BTHP_0CAY_hoan_tra,
+                    ],
+                    "COMBO_4_BTHP_CAY": [
+                        soluong_COMBO_4_BTHP_CAY_hoan_thanh,
+                        soluong_COMBO_4_BTHP_CAY_hoan_thanh
+                        + soluong_COMBO_4_BTHP_CAY_den_bu,
+                        soluong_COMBO_4_BTHP_CAY_boom
+                        + soluong_COMBO_4_BTHP_CAY_hoan_tra,
                     ],
                 },
                 index=["HOÀN THÀNH", "QUYẾT TOÁN", "HOÀN VỀ"],
