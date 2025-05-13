@@ -1243,6 +1243,9 @@ if process_btn:
                 index=["Tiktok"],
             )
 
+            def format_vn_number(x):
+                return f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
             bang_thong_ke_tien_tiktok = pd.DataFrame(
                 {
                     "SỐ TIỀN QUYẾT TOÁN": [Tong_tien_quyet_toan],
@@ -1254,6 +1257,10 @@ if process_btn:
                     "LỢI NHUẬN": [Tong_tien_quyet_toan - (Tong_von_SC + Tong_von_BTHP)],
                 },
                 index=["Tiktok"],
+            )
+
+            bang_thong_ke_tien_tiktok = bang_thong_ke_tien_tiktok.applymap(
+                format_vn_number
             )
 
             bang_thong_ke_so_luong_tiktok = pd.DataFrame(
