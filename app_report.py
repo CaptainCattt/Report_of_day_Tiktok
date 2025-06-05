@@ -1248,12 +1248,12 @@ if process_btn:
 
             bang_thong_ke_tien_tiktok = pd.DataFrame(
                 {
-                    "SỐ TIỀN QUYẾT TOÁN": [Tong_tien_quyet_toan],
                     "SỐ TIỀN HOÀN THÀNH": [Tong_tien_hoan_thanh],
+                    "SỐ TIỀN QUYẾT TOÁN": [Tong_tien_quyet_toan],
+                    "TỔNG VỐN": [Tong_von_SC + Tong_von_BTHP],
                     "PHÍ": [Tong_phi],
                     "TỔNG VỐN SỐT CHẤM": [Tong_von_SC],
                     "TỔNG VỐN BÁNH TRÁNG": [Tong_von_BTHP],
-                    "TỔNG VỐN": [Tong_von_SC + Tong_von_BTHP],
                     "LỢI NHUẬN": [Tong_tien_quyet_toan - (Tong_von_SC + Tong_von_BTHP)],
                 },
                 index=["Tiktok"],
