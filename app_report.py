@@ -1572,12 +1572,11 @@ if st.session_state.processing:
     st.markdown("#### 📈 Biểu Đồ Số Lượng Đơn Hàng")
     st.plotly_chart(st.session_state["fig_bar_tiktok"], use_container_width=True)
 
-    col3, col4 = st.columns(2)
-    with col3:
+    with st.container():
         st.markdown("#### 📋 Bảng Thống Kê Sản Phẩm SỐT CHẤM")
         st.dataframe(st.session_state["bang_thong_ke_so_luong_tiktok"])
 
-    with col4:
+    with st.container():
         st.markdown("#### 📋 Bảng Thống Kê Sản Phẩm BÁNH TRÁNG HÀNH PHI")
         st.dataframe(st.session_state["bang_thong_ke_so_luong_BTHP_tiktok"])
 
